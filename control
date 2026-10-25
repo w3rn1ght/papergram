@@ -1,0 +1,11 @@
+Package: com.papergram.client
+Name: Papergram
+Version: 0.1.0
+Architecture: iphoneos-arm
+Description: A lightweight Telegram client for iOS 12 and older iPads. Powered by TDLib.
+Homepage: https://github.com/w3rn1ght/papergram
+Maintainer: w3rn1ght
+Author: w3rn1ght
+Section: Applications
+Depends: firmware (>= 12.0)
+Tag: purpose::uikit, role::enduser

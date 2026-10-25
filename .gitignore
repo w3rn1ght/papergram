@@ -1,0 +1,12 @@
+# Build outputs
+.theos/
+packages/
+build/
+.tdlib/
+.tdlib-build/
+
+# Local overrides
+app/PGSecrets.h.local
+*.xcuserdatad
+.DS_Store
+Thumbs.db
