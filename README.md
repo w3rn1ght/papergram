@@ -198,6 +198,9 @@ The iPad Air 1 is the design constraint, not an afterthought.
 | `use_file_database = false` | No media cache, fewer writes |
 | No Swift runtime | Smaller binary, faster launch |
 
+Release footprint: **4.9 MB `.deb`**, **~20 MB installed**, **7.4 MB unsigned
+`.ipa`**.
+
 Typical resident memory after opening a few chats: **under ~150 MB**, with no
 image cache to grow over time.
 
