@@ -50,16 +50,24 @@ jobs:
 
       - name: Restore TDLib cache
         id: tdlib-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: .tdlib
           key: tdlib-${{ env.TDLIB_VERSION }}-${{ env.OPENSSL_VERSION }}-ios${{ env.IOS_MIN }}-arm64-${{ hashFiles('scripts/build-tdlib.sh') }}
 
       - name: Build TDLib
+        id: tdlib-build
         if: steps.tdlib-cache.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
           bash scripts/build-tdlib.sh
+
+      - name: Save TDLib cache
+        if: always() && steps.tdlib-cache.outputs.cache-hit != 'true' && steps.tdlib-build.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: .tdlib
+          key: tdlib-${{ env.TDLIB_VERSION }}-${{ env.OPENSSL_VERSION }}-ios${{ env.IOS_MIN }}-arm64-${{ hashFiles('scripts/build-tdlib.sh') }}
 
       - name: Inject API credentials
         env:
@@ -97,17 +105,19 @@ jobs:
       - name: Create unsigned IPA
         run: |
           set -euo pipefail
+          VERSION=$(awk '/^Version:/ {print $2}' control)
           mkdir -p build/Payload
           cp -R .theos/_/Applications/Papergram.app build/Payload/
-          cd build
-          zip -qry Papergram-unsigned.ipa Payload
+          (cd build && zip -qry Papergram-unsigned.ipa Payload)
+          cp "$(ls packages/*.deb | head -n1)" "build/Papergram-${VERSION}.deb"
+          ls -la build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Papergram-packages
           path: |
-            packages/*.deb
+            build/Papergram-*.deb
             build/Papergram-unsigned.ipa
           if-no-files-found: error
 
@@ -118,7 +128,7 @@ jobs:
         run: |
           set -euo pipefail
           gh release create "$GITHUB_REF_NAME" \
-            packages/*.deb \
+            build/Papergram-*.deb \
             build/Papergram-unsigned.ipa \
             --title "Papergram $GITHUB_REF_NAME" \
             --generate-notes

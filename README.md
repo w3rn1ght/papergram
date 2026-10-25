@@ -111,7 +111,7 @@ someone else's keys.
 
 - macOS with Xcode 15 (or newer) and the iOS SDK
 - [Theos](https://theos.dev) with `ldid`, `dpkg` and `xz`
-- CMake, `gperf`
+- CMake, `gperf`, Python 3
 - About 4 GB of free disk space for the TDLib build
 
 ```sh
@@ -198,7 +198,8 @@ The iPad Air 1 is the design constraint, not an afterthought.
 | `use_file_database = false` | No media cache, fewer writes |
 | No Swift runtime | Smaller binary, faster launch |
 
-Typical resident memory after opening a few chats: **60–120 MB**.
+Typical resident memory after opening a few chats: **under ~150 MB**, with no
+image cache to grow over time.
 
 ## Roadmap
 
