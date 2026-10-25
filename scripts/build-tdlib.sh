@@ -49,6 +49,34 @@ if [ ! -d "$TD_SRC/.git" ]; then
         https://github.com/tdlib/td.git "$TD_SRC"
 fi
 
+# TDLib v1.8.0 ships a toolchain file that still uses exec_program(), which
+# CMake 4 rejects (CMP0153). The two calls are pure information queries, so
+# replacing them with execute_process() preserves the behaviour.
+log "Patching iOS.cmake for CMake 4 compatibility"
+python3 - "$TD_SRC/CMake/iOS.cmake" <<'PY'
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    text = handle.read()
+
+replacements = {
+    "exec_program(uname ARGS -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION)":
+        "execute_process(COMMAND uname -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION "
+        "OUTPUT_STRIP_TRAILING_WHITESPACE)",
+    "exec_program(/usr/bin/xcode-select ARGS -print-path OUTPUT_VARIABLE CMAKE_XCODE_DEVELOPER_DIR)":
+        "execute_process(COMMAND /usr/bin/xcode-select -print-path "
+        "OUTPUT_VARIABLE CMAKE_XCODE_DEVELOPER_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)",
+}
+
+for old, new in replacements.items():
+    if old in text:
+        text = text.replace(old, new)
+
+with open(path, "w", encoding="utf-8") as handle:
+    handle.write(text)
+PY
+
 # ---------------------------------------------------------------------------
 # 1. Generate the TL source files on the host. The iOS build is a
 #    cross-compilation and therefore cannot run the generators itself.
