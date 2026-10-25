@@ -146,7 +146,9 @@ if [ -z "$ARCHIVES" ]; then
     exit 1
 fi
 # shellcheck disable=SC2086
-libtool -static -o "$TDLIB_ROOT/lib/libtdjson_all.a" $ARCHIVES "$OPENSSL_PREFIX/lib/libcrypto.a"
+libtool -static -o "$TDLIB_ROOT/lib/libtdjson_all.a" $ARCHIVES \
+    "$OPENSSL_PREFIX/lib/libcrypto.a" \
+    "$OPENSSL_PREFIX/lib/libssl.a"
 
 log "Copying headers"
 cp "$TD_SRC/td/telegram/td_json_client.h" "$TDLIB_ROOT/include/td/telegram/"
