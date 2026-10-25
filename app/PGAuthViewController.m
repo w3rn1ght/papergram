@@ -6,6 +6,7 @@
 #import "PGAuthViewController.h"
 #import "PGConfig.h"
 #import "PGLogoView.h"
+#import "PGQRCodeView.h"
 #import "PGTheme.h"
 #import "PGUIKit.h"
 
@@ -60,6 +61,9 @@ static NSString *PGCompactCode(NSString *input)
     UIButton *_resendButton;
     UIButton *_changeNumberButton;
     UITextField *_activeField;
+
+    PGQRCodeBox *_qrBox;
+    UILabel *_qrStatusLabel;
 
     NSTimer *_resendTimer;
     NSInteger _resendSeconds;
@@ -123,9 +127,24 @@ static NSString *PGCompactCode(NSString *input)
 
 - (void)applyAuthState:(PGAuthState)state info:(NSDictionary *)info
 {
+    NSString *oldLink = [_info[PGAuthInfoLinkKey] isKindOfClass:[NSString class]]
+        ? _info[PGAuthInfoLinkKey]
+        : nil;
+    NSDictionary *newInfo = [info isKindOfClass:[NSDictionary class]] ? info : @{};
+    NSString *newLink = [newInfo[PGAuthInfoLinkKey] isKindOfClass:[NSString class]]
+        ? newInfo[PGAuthInfoLinkKey]
+        : nil;
+
     BOOL changed = (state != _state);
     _state = state;
-    _info = [info isKindOfClass:[NSDictionary class]] ? info : @{};
+    _info = newInfo;
+
+    if (!changed && state == PGAuthStateWaitOtherDevice) {
+        if (oldLink != newLink && ![oldLink isEqualToString:newLink]) {
+            [self updateQRCode];
+        }
+        return;
+    }
 
     if (changed) {
         _errorText = nil;
@@ -177,6 +196,8 @@ static NSString *PGCompactCode(NSString *input)
     _resendButton = nil;
     _changeNumberButton = nil;
     _activeField = nil;
+    _qrBox = nil;
+    _qrStatusLabel = nil;
 
     switch (_state) {
         case PGAuthStateNeedsCredentials:
@@ -195,7 +216,7 @@ static NSString *PGCompactCode(NSString *input)
             [self buildRegistrationForm];
             break;
         case PGAuthStateWaitOtherDevice:
-            [self buildOtherDeviceForm];
+            [self buildQRForm];
             break;
         case PGAuthStateUnsupported:
             [self buildUnsupportedForm];
@@ -290,6 +311,8 @@ static NSString *PGCompactCode(NSString *input)
     _primaryButton = button;
     [self addItem:button];
 
+    [self addItem:[self makeLinkButtonWithTitle:@"Log in by QR code" action:@selector(startQRLogin)]];
+
     [self addItem:[self footnoteWithText:@"Your number is only used to authorize this session."]];
 }
 
@@ -363,20 +386,23 @@ static NSString *PGCompactCode(NSString *input)
     [self addItem:button];
 }
 
-- (void)buildOtherDeviceForm
+- (void)buildQRForm
 {
     [self buildLogo];
-    [self buildHeaderWithTitle:@"Confirm on another device"
-                     subtitle:@"Open Telegram on a device where you are already signed in and confirm this login."];
+    [self buildHeaderWithTitle:@"Scan to log in"
+                     subtitle:@"Open Telegram on your phone and go to Settings → Devices → Scan QR code."];
 
-    NSString *link = _info[PGAuthInfoLinkKey];
-    if ([link isKindOfClass:[NSString class]] && link.length > 0) {
-        [self addItem:[self footnoteWithText:link]];
-    }
+    PGQRCodeBox *box = [[PGQRCodeBox alloc] initWithFrame:CGRectMake(0, 0, 1, 232)];
+    _qrBox = box;
+    [self addItem:box];
 
-    PGPrimaryButton *button = [self makePrimaryButtonWithTitle:@"Cancel sign-in" action:@selector(cancelSignIn)];
-    _primaryButton = button;
-    [self addItem:button];
+    _qrStatusLabel = [self footnoteWithText:@"Waiting for confirmation…"];
+    [self addItem:_qrStatusLabel];
+
+    [self addItem:[self makeLinkButtonWithTitle:@"Log in with phone number"
+                                         action:@selector(usePhoneNumber)]];
+
+    [self updateQRCode];
 }
 
 - (void)buildUnsupportedForm
@@ -546,6 +572,37 @@ static NSString *PGCompactCode(NSString *input)
     _busy = YES;
     _primaryButton.enabled = NO;
     [[PGClient shared] setPhoneNumber:phone];
+}
+
+- (void)startQRLogin
+{
+    _busy = YES;
+    _primaryButton.enabled = NO;
+    [[PGClient shared] beginQRLogin];
+}
+
+- (void)usePhoneNumber
+{
+    [self applyAuthState:PGAuthStateWaitParameters info:@{}];
+    [[PGClient shared] cancelQRLogin];
+}
+
+- (void)updateQRCode
+{
+    if (_qrBox == nil || _qrStatusLabel == nil) {
+        return;
+    }
+
+    NSString *link = _info[PGAuthInfoLinkKey];
+    if (![link isKindOfClass:[NSString class]]) {
+        link = nil;
+    }
+
+    BOOL rendered = link.length > 0 && [_qrBox setString:link];
+    _qrStatusLabel.text = rendered
+        ? @"Waiting for confirmation…"
+        : @"Could not render the QR code. Use the phone number instead.";
+    [self.view setNeedsLayout];
 }
 
 - (void)submitCode

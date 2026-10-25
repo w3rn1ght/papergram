@@ -34,6 +34,26 @@ env:
   IOS_MIN: "12.0"
 
 jobs:
+  qr-tests:
+    name: QR encoder tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y clang libzbar-dev
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet qrcode pillow pyzbar
+
+      - name: Verify encoder
+        run: |
+          set -euo pipefail
+          .venv/bin/python tools/verify_qr.py
+
   build:
     name: Build package
     runs-on: macos-14

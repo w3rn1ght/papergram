@@ -359,10 +359,15 @@ static NSArray<NSNumber *> *PGJSONIntegerArray(id value)
     }
 }
 
-/// TDLib cannot be reused after authorizationStateClosed (for example after
-/// an explicit logout). The old instance is torn down and a fresh one is
-/// created so that the user can sign in again without relaunching the app.
 - (void)scheduleRestartAfterClose
+{
+    [self restartClient];
+}
+
+/// TDLib cannot be reused after authorizationStateClosed (for example after
+/// an explicit logout) or when an interactive login flow is cancelled. The old
+/// instance is torn down and a fresh one is created.
+- (void)restartClient
 {
     if (_restartScheduled) {
         return;
@@ -456,6 +461,34 @@ static NSArray<NSNumber *> *PGJSONIntegerArray(id value)
         @"settings": [NSNull null],
     };
     [self sendRequest:request completion:nil];
+}
+
+- (void)beginQRLogin
+{
+    PGAuthState state = _authState;
+    if (state != PGAuthStateWaitPhoneNumber &&
+        state != PGAuthStateWaitCode &&
+        state != PGAuthStateWaitPassword &&
+        state != PGAuthStateWaitRegistration) {
+        return;
+    }
+
+    [self sendRequest:@{@"@type": @"requestQrCodeAuthentication",
+                        @"other_user_ids": @[]}
+           completion:nil];
+}
+
+- (void)cancelQRLogin
+{
+    if (_authState != PGAuthStateWaitOtherDevice) {
+        return;
+    }
+
+    _authState = PGAuthStateWaitParameters;
+    if ([self.delegate respondsToSelector:@selector(clientDidChangeAuthorizationState:info:)]) {
+        [self.delegate clientDidChangeAuthorizationState:_authState info:@{}];
+    }
+    [self restartClient];
 }
 
 - (void)submitCode:(NSString *)code

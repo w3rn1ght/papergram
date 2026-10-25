@@ -28,13 +28,36 @@ Telegram
   queue, preserving order.
 - **Auth.** TDLib's `updateAuthorizationState` is mapped to a small enum.
   `PGAuthStateNeedsCredentials` is a local pseudo-state used when no API keys
-  are configured.
+  are configured. Login can go two ways:
+  - **Phone.** `setAuthenticationPhoneNumber` → `checkAuthenticationCode` →
+    `checkAuthenticationPassword` when the account has two-step verification.
+  - **QR.** `requestQrCodeAuthentication` moves TDLib into
+    `authorizationStateWaitOtherDeviceConfirmation`. TDLib rotates the
+    `tg://login?token=…` link; every update is forwarded to the auth screen,
+    which re-renders the symbol. Scanning the code on a signed-in device either
+    completes the login or asks for the cloud password.
 - **Data.** Only chats and user names are cached in memory. Messages live in
   the conversation controller, so moving between chats drops them.
-- **Restart.** TDLib cannot be reused after `authorizationStateClosed`. On
-  logout the receive loop is stopped, the client destroyed, and a fresh one
-  created, which is what makes "log out and sign in again" work without
-  relaunching the app.
+- **Restart.** TDLib cannot be reused after `authorizationStateClosed` or after
+  an interactive login flow is cancelled. The receive loop is stopped, the
+  client destroyed, and a fresh one created, which is what makes "log out",
+  "sign in again" and "back to phone number" work without relaunching the app.
+
+### QR encoder
+
+`PGQRCode.c` is dependency-free C: byte mode, error correction level M,
+versions 1–10 (enough for a login link), Reed–Solomon over GF(256), all eight
+masks with the standard penalty scoring. It is compiled into the app through
+`PGQRCode.m` and rendered by `PGQRCodeView` with CoreGraphics.
+
+The encoder is tested off-device:
+
+```sh
+python3 tools/verify_qr.py
+```
+
+The script compares every mask against `python-qrcode` and decodes the
+automatically masked symbols with zbar.
 
 ### UI
 

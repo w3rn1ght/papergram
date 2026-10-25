@@ -37,7 +37,7 @@ animated everything. Papergram takes the opposite approach:
 
 | | |
 |---|---|
-| **Sign in** | Phone number, login code, two-step verification, account registration |
+| **Sign in** | Phone number, login code, two-step verification, QR code login, account registration |
 | **Chat list** | Unread badges, mentions, last message previews, connection status |
 | **Conversations** | Paginated history, sender names in groups, service messages |
 | **Messaging** | Send and receive text, delivery failures, edited and deleted messages |
@@ -73,7 +73,7 @@ The package is `iphoneos-arm` and installs to `/Applications`.
 2. Open it in **Filza** and tap *Install*, or install from a shell:
 
    ```sh
-   dpkg -i Papergram-0.1.0.deb
+   dpkg -i Papergram-0.2.0.deb
    ```
 
 3. If the icon does not appear immediately:
@@ -147,6 +147,18 @@ mkdir -p build/Payload
 cp -R .theos/_/Applications/Papergram.app build/Payload/
 (cd build && zip -qry Papergram-unsigned.ipa Payload)
 ```
+
+### Verification
+
+The QR encoder is checked against `python-qrcode` and decoded with zbar:
+
+```sh
+pip install qrcode pillow pyzbar
+python3 tools/verify_qr.py
+```
+
+It needs a C compiler and the zbar shared library (`apt install libzbar0`,
+`pacman -S zbar`). The script is not part of the application build.
 
 ### CI
 

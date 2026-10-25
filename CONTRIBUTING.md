@@ -50,6 +50,18 @@ These are review blockers:
 5. No iOS 13+ APIs. The deployment target is 12.0 and the build must run on an
    iPad Air 1.
 
+## Testing
+
+Always test on a real device when possible. The QR encoder has a host test:
+
+```sh
+pip install qrcode pillow pyzbar   # plus the zbar shared library
+python3 tools/verify_qr.py
+```
+
+It compares every mask with `python-qrcode` and decodes the generated symbols
+with zbar. Run it after touching `app/PGQRCode.c`.
+
 ## Code style
 
 - Objective-C, ARC, `PG` class prefix.

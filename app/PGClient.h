@@ -81,6 +81,10 @@ extern NSString *const PGContentKey;        // NSDictionary
 - (void)retryWithCredentials;
 
 - (void)setPhoneNumber:(NSString *)phoneNumber;
+/// Switches to QR-code login. Valid while TDLib waits for a phone number.
+- (void)beginQRLogin;
+/// Aborts QR login and returns to the phone number screen.
+- (void)cancelQRLogin;
 - (void)submitCode:(NSString *)code;
 - (void)submitPassword:(NSString *)password;
 - (void)registerFirstName:(NSString *)firstName lastName:(NSString *)lastName;

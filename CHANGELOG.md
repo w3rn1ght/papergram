@@ -16,6 +16,21 @@ All notable changes to this project are documented here. The format follows
 - Local notifications through a jailbreak daemon
 - Localization
 
+## [0.2.0] - 2026-10-25
+
+### Added
+- QR code login: scan the code from an already signed-in Telegram app.
+- QR encoder written from scratch in C, verified against `python-qrcode` and
+  decoded with zbar (`tools/verify_qr.py`).
+- "Log in by QR code" and "Log in with phone number" switches on the auth
+  screen.
+- Live QR refresh as TDLib rotates the login link.
+- Cancelling QR login restarts the TDLib instance cleanly.
+
+### Changed
+- Two-step verification is part of the documented login path: phone or QR,
+  then code, then the cloud password when the account has one.
+
 ## [0.1.0] - 2026-10-25
 
 ### Added
