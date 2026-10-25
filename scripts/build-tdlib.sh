@@ -91,6 +91,7 @@ fi
 log "Configuring TDLib for iOS arm64 (deployment target $IOS_MIN)"
 cmake -S "$TD_SRC" -B "$IOS_BUILD" \
     -DCMAKE_TOOLCHAIN_FILE="$TD_SRC/CMake/iOS.cmake" \
+    -DCMAKE_MAKE_PROGRAM="$(xcrun --find make)" \
     -DIOS_PLATFORM=OS \
     -DIOS_ARCH=arm64 \
     -DIOS_DEPLOYMENT_TARGET="$IOS_MIN" \
