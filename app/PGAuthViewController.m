@@ -158,6 +158,9 @@ static NSString *PGCompactCode(NSString *input)
 
 - (void)rebuild
 {
+    [_resendTimer invalidate];
+    _resendTimer = nil;
+
     for (UIView *item in _items) {
         [item removeFromSuperview];
     }
@@ -193,6 +196,9 @@ static NSString *PGCompactCode(NSString *input)
             break;
         case PGAuthStateWaitOtherDevice:
             [self buildOtherDeviceForm];
+            break;
+        case PGAuthStateUnsupported:
+            [self buildUnsupportedForm];
             break;
         case PGAuthStateWaitParameters:
         case PGAuthStateWaitEncryptionKey:
@@ -367,6 +373,25 @@ static NSString *PGCompactCode(NSString *input)
     if ([link isKindOfClass:[NSString class]] && link.length > 0) {
         [self addItem:[self footnoteWithText:link]];
     }
+
+    PGPrimaryButton *button = [self makePrimaryButtonWithTitle:@"Cancel sign-in" action:@selector(cancelSignIn)];
+    _primaryButton = button;
+    [self addItem:button];
+}
+
+- (void)buildUnsupportedForm
+{
+    [self buildLogo];
+
+    NSString *stateType = _info[PGAuthInfoStateTypeKey];
+    NSString *detail = [stateType isKindOfClass:[NSString class]] && stateType.length > 0
+        ? stateType
+        : @"unknown";
+
+    [self buildHeaderWithTitle:@"Unsupported sign-in step"
+                     subtitle:[NSString stringWithFormat:
+                               @"This account requires a step Papergram does not implement yet (%@). Try a newer build or another client.",
+                               detail]];
 
     PGPrimaryButton *button = [self makePrimaryButtonWithTitle:@"Cancel sign-in" action:@selector(cancelSignIn)];
     _primaryButton = button;

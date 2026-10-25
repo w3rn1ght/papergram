@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: TDLib documentation
+    url: https://core.telegram.org/tdlib/docs/
+    about: Protocol and API reference used by Papergram
+  - name: Telegram API terms
+    url: https://core.telegram.org/api/terms
+    about: Rules that apply to every third-party Telegram client

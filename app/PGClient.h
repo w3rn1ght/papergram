@@ -19,6 +19,7 @@ typedef NS_ENUM(NSInteger, PGAuthState) {
     PGAuthStateWaitPassword,
     PGAuthStateWaitRegistration,
     PGAuthStateWaitOtherDevice,
+    PGAuthStateUnsupported,
     PGAuthStateReady,
     PGAuthStateLoggingOut,
     PGAuthStateClosed,
@@ -35,6 +36,7 @@ typedef NS_ENUM(NSInteger, PGConnectionState) {
 extern NSString *const PGAuthInfoCodeInfoKey;       // NSDictionary (authenticationCodeInfo)
 extern NSString *const PGAuthInfoPasswordHintKey;   // NSString
 extern NSString *const PGAuthInfoLinkKey;           // NSString
+extern NSString *const PGAuthInfoStateTypeKey;      // NSString
 
 extern NSString *const PGClientChatListDidChangeNotification;
 extern NSString *const PGClientConnectionDidChangeNotification;
@@ -99,7 +101,7 @@ extern NSString *const PGContentKey;        // NSDictionary
           toChat:(long long)chatID
       completion:(void (^_Nullable)(PGMessage *_Nullable message, NSString *_Nullable errorMessage))completion;
 
-- (void)markChatRead:(long long)chatID;
+- (void)markChatRead:(long long)chatID upToMessageID:(long long)messageID;
 - (void)openChat:(long long)chatID;
 - (void)closeChat:(long long)chatID;
 

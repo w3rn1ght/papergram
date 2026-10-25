@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a crash, a visual glitch or a protocol problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please remove phone numbers, API hashes, login
+        codes and session data from logs before posting.
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: iPad Air 1
+    validations:
+      required: true
+  - type: input
+    id: ios
+    attributes:
+      label: iOS version
+      placeholder: 12.5.7
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation method
+      options:
+        - .deb (Sileo / Zebra / Filza)
+        - Unsigned IPA (AltStore / Sideloadly)
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Papergram version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: A clear description of the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Optional. The TDLib log is described in CONTRIBUTING.md.
+      render: text
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Checklist
+      options:
+        - label: I removed phone numbers, API hashes, login codes and session data from this report.
+          required: true
+        - label: I searched existing issues before opening this one.
+          required: true

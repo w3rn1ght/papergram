@@ -13,6 +13,7 @@
 NSString *const PGAuthInfoCodeInfoKey = @"codeInfo";
 NSString *const PGAuthInfoPasswordHintKey = @"passwordHint";
 NSString *const PGAuthInfoLinkKey = @"link";
+NSString *const PGAuthInfoStateTypeKey = @"stateType";
 
 NSString *const PGClientChatListDidChangeNotification = @"PGClientChatListDidChange";
 NSString *const PGClientConnectionDidChangeNotification = @"PGClientConnectionDidChange";
@@ -327,6 +328,9 @@ static NSArray<NSNumber *> *PGJSONIntegerArray(id value)
         newState = PGAuthStateLoggingOut;
     } else if ([type isEqualToString:@"authorizationStateClosed"]) {
         newState = PGAuthStateClosed;
+    } else {
+        info[PGAuthInfoStateTypeKey] = type;
+        newState = PGAuthStateUnsupported;
     }
 
     _authState = newState;
@@ -871,18 +875,19 @@ static NSArray<NSNumber *> *PGJSONIntegerArray(id value)
     }];
 }
 
-- (void)markChatRead:(long long)chatID
+- (void)markChatRead:(long long)chatID upToMessageID:(long long)messageID
 {
     PGChat *chat = _chats[@(chatID)];
     chat.unreadCount = 0;
     chat.markedAsUnread = NO;
     [self postChatListChange];
 
+    NSArray<NSNumber *> *messageIDs = messageID > 0 ? @[@(messageID)] : @[];
     NSDictionary *request = @{
         @"@type": @"viewMessages",
         @"chat_id": @(chatID),
         @"message_thread_id": @0,
-        @"message_ids": @[],
+        @"message_ids": messageIDs,
         @"force_read": @YES,
     };
     [self sendRequest:request completion:nil];

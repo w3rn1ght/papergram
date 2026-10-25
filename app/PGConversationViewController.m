@@ -122,7 +122,7 @@ static const NSInteger PGHistoryLimit = 400;
     [super viewDidAppear:animated];
     [[PGClient shared] openChat:_chatID];
     if (_didInitialLoad) {
-        [[PGClient shared] markChatRead:_chatID];
+        [self markChatRead];
     }
 }
 
@@ -215,7 +215,7 @@ static const NSInteger PGHistoryLimit = 400;
         dispatch_async(dispatch_get_main_queue(), ^{
             [self scrollToBottomAnimated:NO];
         });
-        [[PGClient shared] markChatRead:self->_chatID];
+        [self markChatRead];
     }];
 }
 
@@ -360,7 +360,7 @@ static const NSInteger PGHistoryLimit = 400;
     [self appendMessage:message];
 
     if (self.view.window != nil) {
-        [[PGClient shared] markChatRead:_chatID];
+        [self markChatRead];
     }
 }
 
@@ -512,6 +512,18 @@ static const NSInteger PGHistoryLimit = 400;
 }
 
 #pragma mark - Helpers
+
+- (void)markChatRead
+{
+    long long latestID = 0;
+    for (PGMessage *message in [_messages reverseObjectEnumerator]) {
+        if (message.identifier > 0) {
+            latestID = message.identifier;
+            break;
+        }
+    }
+    [[PGClient shared] markChatRead:_chatID upToMessageID:latestID];
+}
 
 - (NSUInteger)indexOfMessage:(long long)identifier
 {

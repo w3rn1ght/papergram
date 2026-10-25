@@ -133,8 +133,7 @@ cmake -S "$TD_SRC" -B "$IOS_BUILD" \
     -DCMAKE_INSTALL_PREFIX="$TDLIB_ROOT"
 
 log "Building TDLib (this takes a while)"
-cmake --build "$IOS_BUILD" -j"$JOBS"
-cmake --install "$IOS_BUILD"
+cmake --build "$IOS_BUILD" -j"$JOBS" --target tdjson_static
 
 # ---------------------------------------------------------------------------
 # 4. Merge every static library into one archive so the app only has to link

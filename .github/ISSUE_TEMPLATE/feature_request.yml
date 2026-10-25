@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose an improvement that fits the project's scope
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Papergram is intentionally small. Features that need image decoding,
+        heavy animations or large dependencies on a 1 GB device are unlikely to
+        be accepted. Please read the roadmap in the README first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behaviour, not necessarily the implementation.
+    validations:
+      required: true
+  - type: dropdown
+    id: cost
+    attributes:
+      label: Expected cost
+      options:
+        - Small (a few files)
+        - Medium (new screen or TDLib request)
+        - Large (new subsystem)
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This can work on an iPad Air 1 without image decoding or animations.
+          required: true
+        - label: This does not require a server component.
