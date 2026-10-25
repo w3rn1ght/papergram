@@ -9,7 +9,7 @@ APPLICATION_NAME := Papergram
 TDLIB_ROOT ?= $(CURDIR)/.tdlib
 
 Papergram_FILES := $(wildcard app/*.m)
-Papergram_FRAMEWORKS := UIKit Foundation CoreGraphics QuartzCore
+Papergram_FRAMEWORKS := UIKit Foundation CoreGraphics QuartzCore Security
 Papergram_CFLAGS := -fobjc-arc -Wno-deprecated-declarations -Iapp -I$(TDLIB_ROOT)/include
 Papergram_LDFLAGS := -L$(TDLIB_ROOT)/lib -Wl,-all_load -ltdjson_all -Wl,-noall_load \
 	-Wl,-dead_strip -lc++ -lz -framework CoreFoundation
